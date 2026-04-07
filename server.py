@@ -242,16 +242,11 @@ def hit(shooter, victim, damage):
     # doing it like that so we can later add stats for shooter or smth
     take_damage(victim, damage)
 
-uuid_to_local_entity = {}
-
-
-get_weapon_type_cooldown = {'punch': 2}
-
-
 weapons = {
     'punch': {'type': 'punch', 'damage': 20, 'magazines': 1, 'magazine_size': 99999, 'time_between_shots': 0.5, 'recoil': 0, 'reload_time': 0},
     'pistol': {'type': 'pistol', 'damage': 30, 'magazines': 4, 'magazine_size': 12, 'time_between_shots': 0.2, 'recoil': 2, 'reload_time': 1.3},
     'rifle': {'type': 'rifle', 'damage': 30, 'magazines': 4, 'magazine_size': 30, 'time_between_shots': 0.1, 'recoil': 1.5, 'reload_time': 2},
+    'RPG': {'type': 'RPG', 'magazines': 4, 'magazine_size': 1, 'time_between_shots': 1, 'recoil': 5, 'reload_time': 2}
 }
 
 def update_weapons(uuid):
@@ -317,6 +312,8 @@ def shoot(request: dict):
     dx, dy = circularize(rotation, 40)
     endx = x+dx
     endy = y+dy
+
+    # handle special cases
     if weapon_type == 'punch':
         new_line({"x": x, "y": y,
                 "end_x": endx,
@@ -326,7 +323,12 @@ def shoot(request: dict):
             if check_circle_point_collision(other['x'], other['y'], other['size'], endx, endy):
                 take_damage(other, weapons[weapon_type]['damage'])
                 play_sound(weapon_type+"_shot_sound", pos=[other['x'], other['y']])
-                return
+                return {"shot": True}
+            
+    if weapon_type == "RPG":
+        ...
+    
+    # general
     else:
         recoil = weapons_type_stats['recoil']
         rotation += random.uniform(recoil, -recoil)
